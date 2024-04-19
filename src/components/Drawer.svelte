@@ -1,5 +1,23 @@
 <script>
+// @ts-nocheck
     import { metaData } from "../store";
+    import { LottiePlayer } from "@lottiefiles/svelte-lottie-player"
+    import shoppingBaganimation from "../assets/shoppingbag.json"
+    import noFile from "../assets/nofile.json"
+    let controlsLayout = [
+    'previousFrame',
+    'playpause',
+    'stop',
+    'nextFrame',
+    'progress',
+    'frame',
+    'loop',
+    'spacer',
+    'background',
+    'snapshot',
+    'zoom',
+    'info',
+  ];
 
     let allData = {};
     let selectedItems = []
@@ -59,15 +77,24 @@
 
 </script>
 
-<div class="drawer flex justify-end drawer-end ">
+<div class="drawer flex w-auto justify-end drawer-end ">
     <input id="my-drawer" type="checkbox" class="drawer-toggle" />
     <div class="drawer-content">
       <!-- Page content here -->
       <div class="indicator drawer-button z-10">
-        <span class="indicator-item badge badge-secondary ">{allData.totalItem}+</span> 
-        <button class="btn p-2">
+        <span class="indicator-item badge badge-primary text-white h-5 rounded-xl text-center p-2 animate-pulse">{allData.totalItem}+</span> 
+        <button class="p-2 bg-transparent">
             <label for="my-drawer" class="cursor-pointer  min-w-10">
-                <i class="fas fa-shopping-bag text-lg"></i>
+                <LottiePlayer
+                src={shoppingBaganimation}
+                autoplay="{true}"
+                loop="{true}"
+                renderer="svg"
+                background="transparent"
+                height="{30}"
+                width="{30}"
+                controlsLayout="{controlsLayout}"
+              />
             </label>
         </button>
       </div>
@@ -75,25 +102,40 @@
     </div> 
     <div class="drawer-side z-50 ">
       <label for="my-drawer" aria-label="close sidebar" class="drawer-overlay "></label>
-      <ul class="menu p-4 w-[300px] md:w-[450px] min-h-full bg-base-200 text-base-content gap-6">
+      <ul class="menu p-4 w-[300px] md:w-[450px] min-h-full bg-base-200 text-base-content gap-6 relative">
         {#if allData.selectedItem.length > 0}
             {#each allData.selectedItem as item}
-                <div class="w-full bg-white rounded-lg p-4 flex flex-row gap-4">
-                    <div class="image w-[120px] h-28 bg-red-700">
-                        <img src={item.image} alt="clothes" class="w-full h-full object-cover object-top">
+                <div class="w-full bg-white rounded-lg p-4 flex flex-row gap-4 items-center justify-center">
+                    <div class="w-[150px] h-full flex items-center justify-center">
+                        <div class="w-[80px]">
+                            <img src={item.image} alt="clothes" class="w-full h-full object-cover object-top">
+                        </div>
                     </div>
                     <div class="p-2 flex flex-col gap-4">
                         <p class="title text-[17px] font-semibold">{item.title}</p>
+                        <p class="text-lg">${item.price * item.quantity}</p>
                         <div class="button flex gap-4">
-                            <button class="btn btn-active btn-info rounded-md px-4 py-2 text-white" on:click={() => removeItem(item)}>-</button>
-                            <button class="btn btn-active btn-info rounded-md px-4 py-2 text-white">{item.quantity}</button>
-                            <button class="btn btn-active btn-info rounded-md px-4 py-2 text-white" on:click={() => addItem(item)}>+</button>
+                            <button class="btn-active bg-[#52b0db] rounded-sm px-6 py-2 text-white" on:click={() => removeItem(item)}>-</button>
+                            <button class="btn-active bg-[#52b0db] rounded-sm px-6 py-2 text-white">{item.quantity}</button>
+                            <button class="btn-active bg-[#52b0db] rounded-sm px-6 py-2 text-white" on:click={() => addItem(item)}>+</button>
                         </div>
                     </div>
                 </div>
             {/each}
         {:else}
-            <p>No items added yet.</p>
+            <div class="absolute m-auto flex items-center justify-center gap-3  w-full">
+                <LottiePlayer
+                    src={noFile}
+                    autoplay="{true}"
+                    loop="{true}"
+                    renderer="svg"
+                    background="transparent"
+                    height="{40}"
+                    width="{40}"
+                    controlsLayout="{controlsLayout}"
+                />
+                <p>No items added yet.</p>
+            </div>
         {/if}
 
       </ul>
