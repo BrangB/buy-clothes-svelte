@@ -1,22 +1,33 @@
 <script>
-  import DisplayItems from "./components/DisplayItems.svelte";
-  import Favorite from "./components/Favorite.svelte";
-  import Navbar from "./components/Navbar.svelte";
+  import Home from "./pages/home.svelte";
+  import router from "page";
+  let page;
+  import Login from "./pages/login.svelte";
+  import { getAuth, onAuthStateChanged } from "firebase/auth";
+  import { UserStore } from "./store";
+  import { onMount } from "svelte";
+
+  const auth = getAuth();
+  onMount(async () => {
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        UserStore.set({userId: user.uid, username: user.displayName, avatar: user.photoURL});
+        console.log("User signed in with ID:", user.uid);
+        if (user.photoURL) {
+          console.log("Profile picture URL:", user.photoURL);
+        } else {
+          console.log("User doesn't have a profile picture");
+        }
+      } else {
+        UserStore.set(user);
+        console.log("User signed out");
+      }
+    });
+  });
+
+  router("/", () => page = Home);
+  router("/login", () => page = Login);
+  router.start();
 </script>
 
-<main class="w-full min-h-screen flex flex-col items-center justify-center p-8">
-  <Navbar />
-  <div class="w-full h-full flex flex-row flex-wrap items-center justify-center gap-6 p-14">
-    <DisplayItems />
-  </div>
-  <div class="w-full h-full flex flex-col flex-wrap items-center justify-center gap-4 mt-6" id="favorite">
-    <h1 class="font-bold text-3xl text-primary uppercase">Your Favorite</h1>
-    <div class="w-full h-full flex flex-row flex-wrap items-center justify-center gap-6 p-14">
-      <Favorite />
-    </div>
-  </div>
-</main>
-
-<style>
-
-</style>
+<svelte:component this={page} />

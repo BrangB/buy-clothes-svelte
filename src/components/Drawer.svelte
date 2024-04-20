@@ -1,8 +1,9 @@
 <script>
 // @ts-nocheck
-    import { metaData } from "../store";
+    import { UserStore, metaData } from "../store";
     import { LottiePlayer } from "@lottiefiles/svelte-lottie-player"
     import shoppingBaganimation from "../assets/shoppingbag.json"
+    import { insertUserData } from "../services/firebase";
     import noFile from "../assets/nofile.json"
     let controlsLayout = [
     'previousFrame',
@@ -22,6 +23,14 @@
     let allData = {};
     let selectedItems = []
 
+    let userdata;
+
+    $:{
+        UserStore.subscribe(value => {
+            userdata = value
+        })
+    }
+
     $: {
         metaData.subscribe(value => {
             allData = value
@@ -40,8 +49,11 @@
                 if(data.id === item.id){
                     data.quantity += 1;
                 }
+                return data
             })
-            return {...tempData, newItemArray}
+            let newData = {...tempData,  selectedItem : newItemArray};
+            insertUserData(userdata.userId, {metadata: newData})
+            return newData
         })
 
     }
@@ -69,8 +81,9 @@
         });
         }
 
-        
-        return {...tempData, selectedItem: newItemArray};
+        let newData = {...tempData, selectedItem: newItemArray}
+        insertUserData(userdata.userId, {metadata: newData})
+        return newData;
     });
 }
 

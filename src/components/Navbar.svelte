@@ -2,6 +2,14 @@
     // your script goes here
 
   import Drawer from "./Drawer.svelte";
+  import { logOut } from "../services/firebase";
+  import { UserStore } from "../store";
+  let userData;
+
+  $:{
+    UserStore.subscribe(value => userData = value)
+  }
+  
 
 </script>
 
@@ -14,14 +22,28 @@
       <ul class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
         <li class="m-1"><a href="/">Homepage</a></li>
         <li class="m-1"><a href="#favorite">Favorite</a></li>
-        <li class="m-1"><a href="/">Sign out</a></li>
+        <li class="m-1"><button on:click={logOut}>Sign out</button></li>
       </ul>
     </div>
   </div>
   <div class="navbar-center">
     <h1 class="btn btn-ghost text-xl">Svelte + daisyUI</h1>
   </div>
-  <div class="navbar-end">
+  <div class="navbar-end flex gap-3">
+    <div class="avatar online">
+      {#if userData && userData.avatar}
+        <div class="w-10 rounded-full">
+          <!-- svelte-ignore a11y-missing-attribute -->
+          <img src={userData.avatar} />
+        </div>
+      {:else}
+        <div class="w-10 rounded-full">
+          <!-- svelte-ignore a11y-missing-attribute -->
+          <img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+        </div>
+      {/if}
+    </div>
+    
     <Drawer />
   </div>
 </div>

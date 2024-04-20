@@ -1,9 +1,10 @@
 <script>
-  import { setItems, items } from "../store";
+  import { setItems, items, UserStore } from "../store";
   import { metaData } from "../store";
   import buyNow from "../assets/buyNow.json";
   // @ts-ignore
   import { LottiePlayer } from "@lottiefiles/svelte-lottie-player";
+  import { getMetaData, insertUserData } from "../services/firebase";
   let controlsLayout = [
     'previousFrame',
     'playpause',
@@ -20,6 +21,27 @@
   ];
 
 let storeData = [];
+let userdata;
+
+$:{
+  UserStore.subscribe(value => {
+    userdata = value
+  })
+}
+
+$:{
+  if(userdata != null){
+    getMetaData(userdata.userId)
+      .then(data => {
+        console.log("userdata ", data);
+        metaData.set(data)
+      })
+      .catch(error => {
+        console.error("Error getting metadata: ", error);
+      });
+  }
+}
+
 
 async function fetchData() {
   const res = await fetch("https://fakestoreapi.com/products");
@@ -49,7 +71,9 @@ $: {
 }
 
 
+
 function BuyClothes(item) {
+
     // Check if the item already exists in the selected items
     const index = selectedItems.findIndex(selected => selected.id === item.id);
     
@@ -61,15 +85,22 @@ function BuyClothes(item) {
                 ...updatedSelectedItem[index],
                 quantity: updatedSelectedItem[index].quantity + 1
             };
-            return {...value, totalItem: value.totalItem + 1, selectedItem: updatedSelectedItem};
+            let newData = {...value, totalItem: value.totalItem + 1, selectedItem: updatedSelectedItem}
+            console.log(newData)
+            insertUserData(userdata.userId, {metadata: newData})
+            return newData;
         });
     } else {
         // If the item is new, add it with quantity 1
-        metaData.update(value => ({
+        metaData.update(value => {
+          let newData = {
             ...value,
             totalItem: value.totalItem + 1,
             selectedItem: [...value.selectedItem, {...item, quantity: 1}]
-        }));
+        }
+          insertUserData(userdata.userId, {metadata: newData})
+          return newData
+        });
     }
     
     // Show alert message

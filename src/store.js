@@ -10,3 +10,4 @@ export const metaData = writable({
 export const setItems = (data) => {
     items.set(data)
 }
+export const UserStore = writable(null);
